@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Ekonomi Regional - Kanwil DJPb Sumatera Selatan</title>
+    
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            color: #1e3a8a;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 10px 40px rgba(30, 58, 138, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .header .subtitle {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            opacity: 0.8;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid #1e3a8a;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(30, 58, 138, 0.15);
+        }
+
+        .stat-card.yellow {
+            border-left-color: #eab308;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-change {
+            font-size: 0.85rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .stat-change.positive {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .stat-change.negative {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Chart Container */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-container h3 {
+            font-size: 1.3rem;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+
+        /* Full Width Chart */
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        .table-container h3 {
+            font-size: 1.3rem;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        }
+
+        thead th {
+            padding: 15px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        tbody td {
+            padding: 15px;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #1e3a8a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 0.95rem;
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 280px;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            thead th, tbody td {
+                padding: 10px;
+            }
+        }
+
+        /* Info Badge */
+        .info-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Dashboard Ekonomi Regional</h1>
+            <p>Monitoring Perkembangan Ekonomi Sumatera Selatan</p>
+            <p class="subtitle">Kanwil Direktorat Jenderal Perbendaharaan Sumatera Selatan</p>
+            <div class="info-badge">Data Real-time • Update Terakhir: <span id="lastUpdate"></span></div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">PDRB Sumatera Selatan</div>
+                <div class="stat-value">Rp 502,3 T</div>
+                <span class="stat-change positive">↑ 5.2% YoY</span>
+            </div>
+
+            <div class="stat-card yellow">
+                <div class="stat-label">Pertumbuhan Ekonomi</div>
+                <div class="stat-value">5.12%</div>
+                <span class="stat-change positive">↑ 0.3% QoQ</span>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Inflasi Tahunan</div>
+                <div class="stat-value">2.85%</div>
+                <span class="stat-change positive">↓ 0.15%</span>
+            </div>
+
+            <div class="stat-card yellow">
+                <div class="stat-label">Realisasi APBD</div>
+                <div class="stat-value">78.5%</div>
+                <span class="stat-change positive">On Track</span>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-grid">
+            <!-- PDRB Chart -->
+            <div class="chart-container">
+                <h3>📈 Pertumbuhan PDRB Tahunan</h3>
+                <div class="chart-wrapper">
+                    <canvas id="pdrbChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sektor Ekonomi Chart -->
+            <div class="chart-container">
+                <h3>🏭 Kontribusi Sektor Ekonomi</h3>
+                <div class="chart-wrapper">
+                    <canvas id="sektorChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Width Chart -->
+        <div class="chart-grid">
+            <div class="chart-container chart-full">
+                <h3>💰 Realisasi Belanja APBD per Sektor (Triliun Rupiah)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="belanja Chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <h3>📊 Detail Indikator Ekonomi Regional</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Indikator</th>
+                        <th>Nilai</th>
+                        <th>Target</th>
+                        <th>Capaian</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pertumbuhan Ekonomi</td>
+                        <td>5.12%</td>
+                        <td>5.50%</td>
+                        <td>93.1%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 93.1%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Inflasi</td>
+                        <td>2.85%</td>
+                        <td>3.00%</td>
+                        <td>95.0%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 95%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Tingkat Pengangguran</td>
+                        <td>4.2%</td>
+                        <td>4.0%</td>
+                        <td>95.2%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 95.2%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Indeks Gini</td>
+                        <td>0.385</td>
+                        <td>0.370</td>
+                        <td>96.1%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 96.1%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Realisasi APBD</td>
+                        <td>78.5%</td>
+                        <td>85.0%</td>
+                        <td>92.4%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 92.4%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Penyerapan KUR</td>
+                        <td>Rp 3.2T</td>
+                        <td>Rp 3.5T</td>
+                        <td>91.4%</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 91.4%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 Kanwil DJPb Sumatera Selatan | Data bersumber dari BPS, BI, dan Kementerian Keuangan</p>
+            <p style="margin-top: 10px; font-size: 0.8rem; opacity: 0.7;">
+                Dashboard ini merupakan bagian dari sistem Ragit Dobel 4.0
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Set Last Update Time
+        function updateTime() {
+            const now = new Date();
+            const options = { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('lastUpdate').textContent = now.toLocaleDateString('id-ID', options);
+        }
+        updateTime();
+
+        // Chart Colors
+        const primaryColor = '#1e3a8a';
+        const secondaryColor = '#3b82f6';
+        const accentColor = '#eab308';
+        const colors = [
+            '#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', 
+            '#eab308', '#fbbf24', '#fcd34d', '#fde68a'
+        ];
+
+        // PDRB Chart
+        const pdrbCtx = document.getElementById('pdrbChart').getContext('2d');
+        new Chart(pdrbCtx, {
+            type: 'line',
+            data: {
+                labels: ['2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                datasets: [{
+                    label: 'PDRB (Triliun Rupiah)',
+                    data: [425, 398, 420, 450, 472, 490, 502.3],
+                    borderColor: primaryColor,
+                    backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: primaryColor,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 12, weight: '600' },
+                            color: '#475569'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return 'PDRB: Rp ' + context.parsed.y + ' T';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value + 'T';
+                            },
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Sektor Ekonomi Chart (Doughnut)
+        const sektorCtx = document.getElementById('sektorChart').getContext('2d');
+        new Chart(sektorCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Pertanian & Perkebunan',
+                    'Pertambangan',
+                    'Industri Pengolahan',
+                    'Perdagangan',
+                    'Jasa-jasa',
+                    'Lainnya'
+                ],
+                datasets: [{
+                    data: [28.5, 22.3, 15.8, 14.2, 12.4, 6.8],
+                    backgroundColor: colors,
+                    borderWidth: 3,
+                    borderColor: '#fff',
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 11 },
+                            color: '#475569',
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => ({
+                                    text: label + ' (' + data.datasets[0].data[i] + '%)',
+                                    fillStyle: data.datasets[0].backgroundColor[i],
+                                    hidden: false,
+                                    index: i
+                                }));
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 13, weight: '600' },
+                        bodyFont: { size: 12 },
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.parsed + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Belanja APBD Chart (Bar)
+        const belanjaCtx = document.getElementById('belanjaChart').getContext('2d');
+        new Chart(belanjaCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'Pendidikan',
+                    'Kesehatan',
+                    'Infrastruktur',
+                    'Perlindungan Sosial',
+                    'Ekonomi',
+                    'Lingkungan',
+                    'Administrasi'
+                ],
+                datasets: [{
+                    label: 'Realisasi 2025',
+                    data: [4.2, 3.8, 3.5, 2.1, 1.9, 1.2, 2.8],
+                    backgroundColor: primaryColor,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }, {
+                    label: 'Target 2025',
+                    data: [4.5, 4.0, 4.0, 2.3, 2.2, 1.5, 3.0],
+                    backgroundColor: accentColor,
+                    borderRadius: 8,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 12, weight: '600' },
+                            color: '#475569',
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': Rp ' + context.parsed.y + ' T';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'Rp ' + value + 'T';
+                            },
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#64748b',
+                            font: { size: 11 }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Animate progress bars on load
+        window.addEventListener('load', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

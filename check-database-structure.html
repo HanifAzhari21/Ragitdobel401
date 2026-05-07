@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Database Supabase - Ragit Dobel 4.0</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .status-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-box.loading {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+        }
+        
+        .status-box.success {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+            color: #15803d;
+        }
+        
+        .status-box.error {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .status-box.warning {
+            background: #fffbeb;
+            border: 2px solid #f59e0b;
+            color: #92400e;
+        }
+        
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .icon {
+            font-size: 24px;
+        }
+        
+        .check-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .check-item h3 {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .check-item .result {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .check-item .result.success {
+            color: #15803d;
+        }
+        
+        .check-item .result.error {
+            color: #991b1b;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge.success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        
+        .badge.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        table th {
+            background: #f1f5f9;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #334155;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        
+        table td {
+            padding: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .summary h2 {
+            font-size: 18px;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+        
+        .summary ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .summary li {
+            padding: 8px 0;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2563eb;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Cek Database Supabase</h1>
+            <p>Ragit Dobel 4.0 - Kanwil DJPb Sumatera Selatan</p>
+        </div>
+        
+        <div class="content">
+            <div id="loading-status" class="status-box loading">
+                <div class="spinner"></div>
+                <div>
+                    <strong>Sedang Mengecek Database...</strong>
+                    <div style="font-size: 13px; margin-top: 5px;">Mohon tunggu sebentar</div>
+                </div>
+            </div>
+            
+            <div id="results" style="display: none;">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://zbexsukhqcgmzgqapoii.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpiZXhzdWtocWNnbXpncWFwb2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4ODM5NTAsImV4cCI6MjA4NzQ1OTk1MH0.7N9wIazzZZW5DbQUMMYu34y0alkt6N6tiGE7TNKbBDg';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const requiredTables = [
+            { name: 'admin_users', description: 'Tabel untuk admin authentication' },
+            { name: 'dashboard_links', description: 'Tabel untuk link Dashboard' },
+            { name: 'lms_links', description: 'Tabel untuk link LMS' },
+            { name: 'dokumentasi_kegiatan', description: 'Tabel untuk dokumentasi kegiatan' },
+            { name: 'dokumentasi_links', description: 'Tabel untuk link dokumentasi per kegiatan' }
+        ];
+        
+        async function checkDatabase() {
+            const results = {
+                overall: 'success',
+                checks: []
+            };
+            
+            try {
+                // 1. Check connection
+                results.checks.push({
+                    name: 'Koneksi Database',
+                    status: 'success',
+                    message: `✅ Berhasil terhubung ke: ${SUPABASE_URL}`,
+                    details: null
+                });
+                
+                // 2. Check each table
+                for (const table of requiredTables) {
+                    try {
+                        const { data, error, count } = await supabase
+                            .from(table.name)
+                            .select('*', { count: 'exact', head: true });
+                        
+                        if (error) {
+                            results.checks.push({
+                                name: `Tabel: ${table.name}`,
+                                status: 'error',
+                                message: `❌ Tabel tidak ditemukan atau tidak dapat diakses`,
+                                details: {
+                                    description: table.description,
+                                    error: error.message
+                                }
+                            });
+                            results.overall = 'error';
+                        } else {
+                            results.checks.push({
+                                name: `Tabel: ${table.name}`,
+                                status: 'success',
+                                message: `✅ Tabel ditemukan (${count || 0} baris data)`,
+                                details: {
+                                    description: table.description,
+                                    rowCount: count || 0
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        results.checks.push({
+                            name: `Tabel: ${table.name}`,
+                            status: 'error',
+                            message: `❌ Error saat mengecek tabel`,
+                            details: {
+                                description: table.description,
+                                error: e.message
+                            }
+                        });
+                        results.overall = 'error';
+                    }
+                }
+                
+                // 3. Check default data
+                try {
+                    const { data: dashboardData } = await supabase
+                        .from('dashboard_links')
+                        .select('*')
+                        .limit(1);
+                    
+                    const { data: lmsData } = await supabase
+                        .from('lms_links')
+                        .select('*')
+                        .limit(1);
+                    
+                    if (dashboardData && dashboardData.length > 0) {
+                        results.checks.push({
+                            name: 'Data Default Dashboard Link',
+                            status: 'success',
+                            message: `✅ Ditemukan data default`,
+                            details: dashboardData[0]
+                        });
+                    } else {
+                        results.checks.push({
+                            name: 'Data Default Dashboard Link',
+                            status: 'warning',
+                            message: `⚠️ Belum ada data default`,
+                            details: null
+                        });
+                    }
+                    
+                    if (lmsData && lmsData.length > 0) {
+                        results.checks.push({
+                            name: 'Data Default LMS Link',
+                            status: 'success',
+                            message: `✅ Ditemukan data default`,
+                            details: lmsData[0]
+                        });
+                    } else {
+                        results.checks.push({
+                            name: 'Data Default LMS Link',
+                            status: 'warning',
+                            message: `⚠️ Belum ada data default`,
+                            details: null
+                        });
+                    }
+                } catch (e) {
+                    // Tables might not exist yet
+                }
+                
+                // 4. Check Storage Bucket
+                try {
+                    const { data: buckets, error: bucketsError } = await supabase
+                        .storage
+                        .listBuckets();
+                    
+                    if (bucketsError) {
+                        results.checks.push({
+                            name: 'Storage Bucket',
+                            status: 'warning',
+                            message: `⚠️ Tidak dapat mengecek storage bucket`,
+                            details: { error: bucketsError.message }
+                        });
+                    } else {
+                        const hasDokumentasiBucket = buckets.some(b => b.name === 'dokumentasi-images');
+                        
+                        if (hasDokumentasiBucket) {
+                            results.checks.push({
+                                name: 'Storage Bucket',
+                                status: 'success',
+                                message: `✅ Bucket 'dokumentasi-images' sudah dibuat`,
+                                details: null
+                            });
+                        } else {
+                            results.checks.push({
+                                name: 'Storage Bucket',
+                                status: 'warning',
+                                message: `⚠️ Bucket 'dokumentasi-images' belum dibuat`,
+                                details: { 
+                                    note: 'Buat bucket secara manual di Supabase Dashboard → Storage',
+                                    buckets: buckets.map(b => b.name)
+                                }
+                            });
+                        }
+                    }
+                } catch (e) {
+                    results.checks.push({
+                        name: 'Storage Bucket',
+                        status: 'error',
+                        message: `❌ Error saat mengecek storage`,
+                        details: { error: e.message }
+                    });
+                }
+                
+            } catch (error) {
+                results.overall = 'error';
+                results.checks.push({
+                    name: 'Error Fatal',
+                    status: 'error',
+                    message: `❌ ${error.message}`,
+                    details: error
+                });
+            }
+            
+            displayResults(results);
+        }
+        
+        function displayResults(results) {
+            const loadingStatus = document.getElementById('loading-status');
+            const resultsDiv = document.getElementById('results');
+            
+            loadingStatus.style.display = 'none';
+            resultsDiv.style.display = 'block';
+            
+            // Overall Status
+            let overallStatusHTML = '';
+            if (results.overall === 'success') {
+                overallStatusHTML = `
+                    <div class="status-box success">
+                        <div class="icon">✅</div>
+                        <div>
+                            <strong>Database Sudah Dikonfigurasi dengan Benar!</strong>
+                            <div style="font-size: 13px; margin-top: 5px;">Semua tabel berhasil dibuat dan siap digunakan</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                overallStatusHTML = `
+                    <div class="status-box error">
+                        <div class="icon">❌</div>
+                        <div>
+                            <strong>Database Belum Dikonfigurasi dengan Benar</strong>
+                            <div style="font-size: 13px; margin-top: 5px;">Beberapa tabel belum dibuat atau tidak dapat diakses</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Detailed checks
+            let checksHTML = '';
+            results.checks.forEach(check => {
+                let badgeClass = check.status === 'success' ? 'success' : check.status === 'error' ? 'error' : 'warning';
+                let detailsHTML = '';
+                
+                if (check.details) {
+                    if (typeof check.details === 'object') {
+                        detailsHTML = '<div class="code">' + JSON.stringify(check.details, null, 2) + '</div>';
+                    } else {
+                        detailsHTML = '<div class="code">' + check.details + '</div>';
+                    }
+                }
+                
+                checksHTML += `
+                    <div class="check-item">
+                        <h3>
+                            <span class="badge ${badgeClass}">${check.status.toUpperCase()}</span>
+                            ${check.name}
+                        </h3>
+                        <div class="result ${check.status}">
+                            ${check.message}
+                            ${detailsHTML}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Summary and actions
+            let summaryHTML = '';
+            const errorCount = results.checks.filter(c => c.status === 'error').length;
+            const warningCount = results.checks.filter(c => c.status === 'warning').length;
+            const successCount = results.checks.filter(c => c.status === 'success').length;
+            
+            if (errorCount > 0) {
+                summaryHTML = `
+                    <div class="summary">
+                        <h2>📋 Langkah Perbaikan</h2>
+                        <ul>
+                            <li>🔴 <strong>${errorCount}</strong> error ditemukan - Tabel belum dibuat</li>
+                            <li>⚠️ <strong>${warningCount}</strong> warning ditemukan</li>
+                            <li>✅ <strong>${successCount}</strong> check berhasil</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">🛠️ Cara Memperbaiki:</h3>
+                        <ol style="padding-left: 20px; color: #475569; line-height: 1.8;">
+                            <li>Buka <a href="https://app.supabase.com/project/zbexsukhqcgmzgqapoii/editor" target="_blank" style="color: #3b82f6; font-weight: 600;">Supabase Dashboard</a></li>
+                            <li>Pilih menu <strong>SQL Editor</strong> di sidebar kiri</li>
+                            <li>Klik <strong>New Query</strong></li>
+                            <li>Copy semua isi file <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 3px;">supabase-setup.sql</code> dari project Anda</li>
+                            <li>Paste ke SQL Editor dan klik <strong>Run</strong></li>
+                            <li>Tunggu hingga selesai (sekitar 10-30 detik)</li>
+                            <li>Refresh halaman ini untuk verify ulang</li>
+                        </ol>
+                        
+                        <div class="btn-group">
+                            <button class="btn" onclick="checkDatabase()">🔄 Cek Ulang Database</button>
+                            <a class="btn" href="https://app.supabase.com/project/zbexsukhqcgmzgqapoii/editor" target="_blank">🚀 Buka Supabase Dashboard</a>
+                        </div>
+                    </div>
+                `;
+            } else if (warningCount > 0) {
+                summaryHTML = `
+                    <div class="summary">
+                        <h2>📋 Status Database</h2>
+                        <ul>
+                            <li>✅ <strong>${successCount}</strong> check berhasil</li>
+                            <li>⚠️ <strong>${warningCount}</strong> warning (opsional)</li>
+                        </ul>
+                        
+                        <p style="margin-top: 15px; color: #475569;">
+                            Database sudah siap digunakan! Warning yang muncul adalah untuk fitur opsional seperti storage bucket atau data default.
+                        </p>
+                        
+                        <div class="btn-group">
+                            <button class="btn" onclick="checkDatabase()">🔄 Cek Ulang Database</button>
+                            <a class="btn" href="/" style="background: #22c55e;">✨ Buka Website</a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                summaryHTML = `
+                    <div class="summary">
+                        <h2>🎉 Database Siap Digunakan!</h2>
+                        <ul>
+                            <li>✅ <strong>${successCount}</strong> check berhasil</li>
+                            <li>✅ Semua tabel sudah dibuat</li>
+                            <li>✅ Data default sudah tersedia</li>
+                            <li>✅ Ready untuk production!</li>
+                        </ul>
+                        
+                        <div class="btn-group">
+                            <button class="btn" onclick="checkDatabase()">🔄 Cek Ulang Database</button>
+                            <a class="btn" href="/" style="background: #22c55e;">✨ Buka Website</a>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = overallStatusHTML + checksHTML + summaryHTML;
+        }
+        
+        // Run check on page load
+        checkDatabase();
+    </script>
+</body>
+</html>

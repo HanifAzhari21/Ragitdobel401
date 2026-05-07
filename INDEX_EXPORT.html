@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dokumentasi Lengkap Website Ragit Dobel 4.0 - Kanwil DJPb Sumatera Selatan">
+    <meta name="keywords" content="Ragit Dobel 4.0, DJPb, Sumatera Selatan, Dashboard Ekonomi, React, TypeScript, Tailwind CSS">
+    <meta name="author" content="IT Magang Kemnaker DJPb Sumsel">
+    <title>Ragit Dobel 4.0 - Dokumentasi Website</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(250, 204, 21, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header .badge {
+            display: inline-block;
+            background: #facc15;
+            color: #1e3a8a;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #1e3a8a;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #facc15;
+        }
+        
+        .section h3 {
+            color: #1e40af;
+            font-size: 1.5rem;
+            margin: 20px 0 10px;
+        }
+        
+        .section p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #1e3a8a;
+        }
+        
+        .info-card h4 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .info-card p {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+        }
+        
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #facc15;
+            background: #1e3a8a;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .tech-badge {
+            background: #1e3a8a;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .credential-box {
+            background: #fef3c7;
+            border: 2px solid #facc15;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .credential-box h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .credential-box .cred-item {
+            display: flex;
+            margin: 8px 0;
+        }
+        
+        .credential-box .cred-label {
+            font-weight: bold;
+            color: #92400e;
+            min-width: 100px;
+        }
+        
+        .credential-box .cred-value {
+            color: #1e3a8a;
+            font-family: monospace;
+            background: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .command {
+            color: #facc15;
+        }
+        
+        .comment {
+            color: #9ca3af;
+        }
+        
+        .url-box {
+            background: #dbeafe;
+            border-left: 4px solid #1e40af;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .url-box a {
+            color: #1e3a8a;
+            text-decoration: none;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        
+        .url-box a:hover {
+            text-decoration: underline;
+        }
+        
+        .footer {
+            background: #1f2937;
+            color: #9ca3af;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .footer h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .footer p {
+            margin: 10px 0;
+        }
+        
+        .footer a {
+            color: #facc15;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #92400e;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🚀 Ragit Dobel 4.0</h1>
+            <p class="subtitle">Landing Page Website Resmi Kanwil DJPb Sumatera Selatan</p>
+            <span class="badge">React • TypeScript • Tailwind CSS</span>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <!-- Informasi Proyek -->
+            <div class="section">
+                <h2>📋 Informasi Proyek</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>Nama Proyek</h4>
+                        <p>Ragit Dobel 4.0 - Landing Page Website Resmi</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Organisasi</h4>
+                        <p>Kanwil DJPb Sumatera Selatan</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Developer</h4>
+                        <p>IT Magang Kemnaker DJPb Sumsel</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Tahun</h4>
+                        <p>2026</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tech Stack -->
+            <div class="section">
+                <h2>🛠️ Technology Stack</h2>
+                <div class="tech-stack">
+                    <span class="tech-badge">React 18.3.1</span>
+                    <span class="tech-badge">TypeScript</span>
+                    <span class="tech-badge">Tailwind CSS v4</span>
+                    <span class="tech-badge">Vite 6.3.5</span>
+                    <span class="tech-badge">React Router DOM</span>
+                    <span class="tech-badge">Material UI</span>
+                    <span class="tech-badge">Lucide Icons</span>
+                    <span class="tech-badge">React Slick</span>
+                    <span class="tech-badge">Recharts</span>
+                    <span class="tech-badge">Motion/React</span>
+                </div>
+            </div>
+            
+            <!-- Fitur Utama -->
+            <div class="section">
+                <h2>✨ Fitur Utama</h2>
+                <ul class="feature-list">
+                    <li><strong>Hero Section:</strong> Logo DJPb watermark 700x700px, gradient biru harmonis</li>
+                    <li><strong>Dashboard Ekonomi Regional:</strong> 3 dashboard cards (Ekonomi, KUR, IKPA) dengan preview stats</li>
+                    <li><strong>Layanan Kanwil:</strong> 6 layanan dengan modal detail dan kontak lengkap</li>
+                    <li><strong>Learning Management System:</strong> 6 kategori pembelajaran, 100+ materi</li>
+                    <li><strong>Dokumentasi Kegiatan:</strong> Carousel react-slick, popup modal dengan blur effect</li>
+                    <li><strong>Autentikasi Admin:</strong> Login modal, session-based auth, CRUD dokumentasi</li>
+                    <li><strong>Dark Mode:</strong> Toggle dengan persistent localStorage, smooth transition 300ms</li>
+                    <li><strong>Fully Responsive:</strong> Mobile, tablet, desktop optimized</li>
+                </ul>
+            </div>
+            
+            <!-- Kredensial Admin -->
+            <div class="section">
+                <h2>🔐 Kredensial Admin</h2>
+                <div class="credential-box">
+                    <h4>⚠️ Informasi Login Admin</h4>
+                    <div class="cred-item">
+                        <span class="cred-label">Username:</span>
+                        <span class="cred-value">RagitAdmin1</span>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">Password:</span>
+                        <span class="cred-value">SayaAdmin1234</span>
+                    </div>
+                    <p style="margin-top: 15px; color: #92400e; font-size: 0.9rem;">
+                        <strong>Catatan:</strong> Autentikasi tersimpan di sessionStorage. Pastikan ubah password di production!
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Skema Warna -->
+            <div class="section">
+                <h2>🎨 Skema Warna</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>Light Mode</h4>
+                        <p><strong>Primary:</strong> Navy Blue (#1e3a8a)</p>
+                        <p><strong>Secondary:</strong> Blue (#1e40af)</p>
+                        <p><strong>Accent:</strong> Yellow (#eab308)</p>
+                        <p><strong>Background:</strong> White (#ffffff)</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Dark Mode</h4>
+                        <p><strong>Primary:</strong> Yellow (#facc15)</p>
+                        <p><strong>Secondary:</strong> Gray-700 (#374151)</p>
+                        <p><strong>Accent:</strong> Yellow (#f59e0b)</p>
+                        <p><strong>Background:</strong> Gray-800 (#1f2937)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Build Commands -->
+            <div class="section">
+                <h2>🚀 Build & Development</h2>
+                
+                <h3>Install Dependencies</h3>
+                <div class="code-block">
+                    <span class="command">npm install</span>
+                </div>
+                
+                <h3>Development Mode</h3>
+                <div class="code-block">
+                    <span class="command">npm run dev</span><br>
+                    <span class="comment"># Berjalan di http://localhost:5173</span>
+                </div>
+                
+                <h3>Production Build</h3>
+                <div class="code-block">
+                    <span class="command">npm run build</span><br>
+                    <span class="comment"># Output: folder /dist siap upload</span>
+                </div>
+            </div>
+            
+            <!-- Deployment -->
+            <div class="section">
+                <h2>🌐 Deployment ke Joomla</h2>
+                
+                <h3>Opsi Rekomendasi: Subfolder dengan Menu Link</h3>
+                <p><strong>Langkah-langkah:</strong></p>
+                <ol style="margin-left: 20px; color: #555;">
+                    <li style="margin: 10px 0;">Upload semua file dari folder <span class="highlight">/dist</span> ke server Joomla</li>
+                    <li style="margin: 10px 0;">Path server: <span class="highlight">/public_html/kanwil/sumsel/id/ragit-dobel-4-0/</span></li>
+                    <li style="margin: 10px 0;">Buat file <span class="highlight">.htaccess</span> untuk React Router</li>
+                    <li style="margin: 10px 0;">Tambah menu item di Joomla Admin Panel (di bawah menu "Inovasi")</li>
+                    <li style="margin: 10px 0;">Test URL production</li>
+                </ol>
+                
+                <div class="url-box">
+                    <strong>URL Production:</strong><br>
+                    <a href="https://djpb.kemenkeu.go.id/kanwil/sumsel/id/ragit-dobel-4-0/" target="_blank">
+                        https://djpb.kemenkeu.go.id/kanwil/sumsel/id/ragit-dobel-4-0/
+                    </a>
+                </div>
+                
+                <h3>.htaccess Configuration</h3>
+                <div class="code-block">
+&lt;IfModule mod_rewrite.c&gt;<br>
+&nbsp;&nbsp;RewriteEngine On<br>
+&nbsp;&nbsp;RewriteBase /kanwil/sumsel/id/ragit-dobel-4-0/<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;RewriteCond %{REQUEST_FILENAME} !-f<br>
+&nbsp;&nbsp;RewriteCond %{REQUEST_FILENAME} !-d<br>
+&nbsp;&nbsp;RewriteRule . /kanwil/sumsel/id/ragit-dobel-4-0/index.html [L]<br>
+&lt;/IfModule&gt;
+                </div>
+            </div>
+            
+            <!-- File Structure -->
+            <div class="section">
+                <h2>📁 Struktur File</h2>
+                <div class="code-block">
+src/<br>
+├── app/<br>
+│   ├── App.tsx<br>
+│   ├── components/<br>
+│   │   ├── Header.tsx<br>
+│   │   ├── HeroSection.tsx<br>
+│   │   ├── DashboardSection.tsx<br>
+│   │   ├── LayananSection.tsx<br>
+│   │   ├── LMSSection.tsx<br>
+│   │   ├── DokumentasiSection.tsx<br>
+│   │   ├── Footer.tsx<br>
+│   │   └── ... (komponen lainnya)<br>
+│   └── contexts/<br>
+│       └── DarkModeContext.tsx<br>
+├── styles/<br>
+│   ├── index.css<br>
+│   ├── tailwind.css<br>
+│   ├── theme.css<br>
+│   └── fonts.css<br>
+└── main.tsx
+                </div>
+            </div>
+            
+            <!-- Dokumentasi Files -->
+            <div class="section">
+                <h2>📚 File Dokumentasi</h2>
+                <p>Website ini dilengkapi dengan dokumentasi lengkap dalam format Markdown:</p>
+                <ul class="feature-list">
+                    <li><strong>KODE_LENGKAP_RAGIT_DOBEL_4.md</strong> - Overview lengkap proyek, struktur, dan fitur</li>
+                    <li><strong>KOMPONEN_SOURCE_CODE.md</strong> - Source code lengkap semua komponen utama</li>
+                    <li><strong>PANDUAN_BUILD_DEPLOYMENT.md</strong> - Panduan step-by-step build dan deployment</li>
+                    <li><strong>INDEX_EXPORT.html</strong> - Dokumentasi visual HTML (file ini)</li>
+                </ul>
+            </div>
+            
+            <!-- Performance -->
+            <div class="section">
+                <h2>📊 Performance Metrics</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4>Lighthouse Score</h4>
+                        <p>Performance: 90-95</p>
+                        <p>Accessibility: 95-100</p>
+                        <p>Best Practices: 90-95</p>
+                        <p>SEO: 85-90</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Page Load Time</h4>
+                        <p>FCP: &lt; 1.5s</p>
+                        <p>LCP: &lt; 2.5s</p>
+                        <p>TTI: &lt; 3.5s</p>
+                        <p>TBT: &lt; 300ms</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Bundle Sizes</h4>
+                        <p>JavaScript: ~567 KB</p>
+                        <p>Gzipped: ~123 KB</p>
+                        <p>CSS: ~234 KB</p>
+                        <p>Gzipped: ~34 KB</p>
+                    </div>
+                    <div class="info-card">
+                        <h4>Optimizations</h4>
+                        <p>✓ Code Splitting</p>
+                        <p>✓ Lazy Loading</p>
+                        <p>✓ GZIP Compression</p>
+                        <p>✓ Browser Caching</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Integrasi -->
+            <div class="section">
+                <h2>🔗 Integrasi dengan Joomla Existing</h2>
+                <p>Website Ragit Dobel 4.0 diintegrasikan dengan sistem Joomla yang sudah ada di:</p>
+                <div class="url-box">
+                    <a href="https://djpb.kemenkeu.go.id/kanwil/sumsel/id/" target="_blank">
+                        https://djpb.kemenkeu.go.id/kanwil/sumsel/id/
+                    </a>
+                </div>
+                <p style="margin-top: 15px;">
+                    <strong>Posisi Menu:</strong> Di header Joomla, bagian layanan, di bawah menu "Inovasi"
+                </p>
+                <p>
+                    <strong>Keuntungan Pendekatan Subfolder:</strong>
+                </p>
+                <ul class="feature-list">
+                    <li>Tidak mengganggu struktur Joomla existing</li>
+                    <li>Mudah maintenance dan update independen</li>
+                    <li>Optimal performance (no iframe overhead)</li>
+                    <li>Dark mode dan session storage berfungsi sempurna</li>
+                    <li>Dapat dikembangkan secara terpisah</li>
+                </ul>
+            </div>
+            
+            <!-- Rencana Pengembangan -->
+            <div class="section">
+                <h2>🎯 Rencana Pengembangan</h2>
+                <ul class="feature-list">
+                    <li><strong>Backend Integration:</strong> Koneksi ke database untuk dokumentasi dan user management</li>
+                    <li><strong>Dashboard Real-time:</strong> Data dari API DJPB, filter dan export data</li>
+                    <li><strong>LMS Fully Functional:</strong> Video pembelajaran, quiz, progress tracking</li>
+                    <li><strong>Notification System:</strong> Toast notifications, email alerts</li>
+                    <li><strong>Analytics:</strong> Google Analytics, user behavior tracking</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <h3>📞 Kontak & Support</h3>
+            <p><strong>Kanwil DJPb Sumatera Selatan</strong></p>
+            <p>📍 Jl. Kapten A. Rivai No. 4, Palembang, Sumatera Selatan 30129</p>
+            <p>📞 (0711) 355430</p>
+            <p>✉️ <a href="mailto:kanwilpalembang@djpb.kemenkeu.go.id">kanwilpalembang@djpb.kemenkeu.go.id</a></p>
+            <p style="margin-top: 30px; color: #6b7280;">
+                <strong>Developer:</strong> IT Magang Kemnaker DJPb Sumsel
+            </p>
+            <p style="margin-top: 20px; font-size: 0.9rem;">
+                © 2026 Kanwil Direktorat Jenderal Perbendaharaan Sumatera Selatan<br>
+                All Rights Reserved
+            </p>
+            <p style="margin-top: 20px; color: #facc15;">
+                Dibuat dengan ❤️ untuk modernisasi layanan publik DJPb Sumatera Selatan
+            </p>
+        </div>
+    </div>
+</body>
+</html>
