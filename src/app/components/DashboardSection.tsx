@@ -191,15 +191,15 @@ export function DashboardSection() {
     },
     {
       icon: <CreditCard />,
-      title: "Dashboard Realisasi Belanja",
-      description: "Monitoring realisasi belanja daerah dan K/L secara real-time dengan breakdown per program dan kegiatan untuk transparansi anggaran",
+      title: "Kredit Usaha Rakyat",
+      description: "Program pembiayaan bersubsidi pemerintah yang ditujukan untuk mendukung pengembangan usaha mikro, kecil, dan menengah (UMKM).",
       gradient: "bg-gradient-to-br from-blue-800 to-blue-700",
       dashboardUrl: "#"
     },
     {
       icon: <BarChart3 />,
-      title: "Dashboard Monitoring Kinerja",
-      description: "Monitoring kinerja pelaksanaan anggaran K/L dan evaluasi capaian target strategis untuk optimalisasi pengelolaan keuangan negara",
+      title: "IKPA",
+      description: "Alat ukur untuk menilai kualitas pelaksanaan anggaran dan kinerja pengelolaan keuangan pada satuan kerja.",
       gradient: "bg-gradient-to-br from-blue-800 to-blue-700",
       dashboardUrl: "#"
     }
