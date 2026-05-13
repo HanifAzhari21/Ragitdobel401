@@ -191,15 +191,15 @@ export function DashboardSection() {
     },
     {
       icon: <CreditCard />,
-      title: "Kredit Usaha Rakyat",
-      description: "Pembiayaan usaha kecil dengan dukungan pemerintah",
+      title: "Dashboard Realisasi Belanja",
+      description: "Monitoring realisasi belanja daerah dan K/L secara real-time dengan breakdown per program dan kegiatan untuk transparansi anggaran",
       gradient: "bg-gradient-to-br from-blue-800 to-blue-700",
       dashboardUrl: "#"
     },
     {
       icon: <BarChart3 />,
-      title: "Indikator Kinerja Pelaksanaan Anggaran (IKPA)",
-      description: "Indikator kualitas pelaksanaan dan pengelolaan anggaran",
+      title: "Dashboard Monitoring Kinerja",
+      description: "Monitoring kinerja pelaksanaan anggaran K/L dan evaluasi capaian target strategis untuk optimalisasi pengelolaan keuangan negara",
       gradient: "bg-gradient-to-br from-blue-800 to-blue-700",
       dashboardUrl: "#"
     }
@@ -240,41 +240,79 @@ export function DashboardSection() {
 
   const fetchDashboardLinks = async () => {
     try {
-      // Try Supabase first
+      // Fetch dashboard links WITHOUT referencing dashboard_index column
+      // This prevents error if column doesn't exist
       const { data, error } = await supabase
         .from('dashboard_links')
         .select('*')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.warn('Supabase fetch failed, using localStorage fallback:', error);
-        // Fallback to localStorage
-        const savedUrl = localStorage.getItem('dashboardUrl');
-        if (savedUrl) {
-          setDashboards(prev => prev.map((dash, idx) => 
-            idx === 0 ? { ...dash, dashboardUrl: savedUrl } : dash
-          ));
+        // Fallback to localStorage for all 3 dashboards
+        setDashboards(prev => prev.map((dash, idx) => {
+          const savedUrl = localStorage.getItem(`dashboardUrl_${idx}`) ||
+                          (idx === 0 ? localStorage.getItem('dashboardUrl') : null);
+          return savedUrl ? { ...dash, dashboardUrl: savedUrl } : dash;
+        }));
+      } else if (data && data.length > 0) {
+        // Check if dashboard_index column exists in the returned data
+        const hasDashboardIndex = data[0] && 'dashboard_index' in data[0];
+
+        if (hasDashboardIndex) {
+          // New schema with dashboard_index: Update all dashboards
+          console.log('✅ Using new schema with dashboard_index');
+          setDashboards(prev => prev.map((dash, idx) => {
+            const dbData = data.find(item => item.dashboard_index === idx);
+            if (dbData && dbData.url) {
+              // Save to localStorage for offline support
+              localStorage.setItem(`dashboardUrl_${idx}`, dbData.url);
+              return { ...dash, dashboardUrl: dbData.url };
+            }
+            // If no data from Supabase for this index, try localStorage
+            const savedUrl = localStorage.getItem(`dashboardUrl_${idx}`);
+            return savedUrl ? { ...dash, dashboardUrl: savedUrl } : dash;
+          }));
+        } else {
+          // Old schema without dashboard_index: Only update first dashboard
+          console.log('⚠️ Using old schema (dashboard_index column not found)');
+          const firstRecord = data[0];
+          if (firstRecord?.url) {
+            setDashboards(prev => prev.map((dash, idx) => {
+              if (idx === 0) {
+                localStorage.setItem('dashboardUrl_0', firstRecord.url);
+                return { ...dash, dashboardUrl: firstRecord.url };
+              }
+              // For dashboard 2 & 3, use localStorage only
+              const savedUrl = localStorage.getItem(`dashboardUrl_${idx}`);
+              return savedUrl ? { ...dash, dashboardUrl: savedUrl } : dash;
+            }));
+          } else {
+            // Use localStorage fallback
+            setDashboards(prev => prev.map((dash, idx) => {
+              const savedUrl = localStorage.getItem(`dashboardUrl_${idx}`) ||
+                              (idx === 0 ? localStorage.getItem('dashboardUrl') : null);
+              return savedUrl ? { ...dash, dashboardUrl: savedUrl } : dash;
+            }));
+          }
         }
-      } else if (data && data.url) {
-        // Update the first dashboard with the stored URL
-        setDashboards(prev => prev.map((dash, idx) => 
-          idx === 0 ? { ...dash, dashboardUrl: data.url } : dash
-        ));
-        // Also save to localStorage for offline support
-        localStorage.setItem('dashboardUrl', data.url);
+      } else {
+        // No data from Supabase, try localStorage for all dashboards
+        setDashboards(prev => prev.map((dash, idx) => {
+          const savedUrl = localStorage.getItem(`dashboardUrl_${idx}`) ||
+                          (idx === 0 ? localStorage.getItem('dashboardUrl') : null);
+          return savedUrl ? { ...dash, dashboardUrl: savedUrl } : dash;
+        }));
       }
     } catch (err) {
-      console.warn('Error fetching dashboard link, using localStorage fallback:', err);
-      // Fallback to localStorage
-      const savedUrl = localStorage.getItem('dashboardUrl');
-      if (savedUrl) {
-        setDashboards(prev => prev.map((dash, idx) => 
-          idx === 0 ? { ...dash, dashboardUrl: savedUrl } : dash
-        ));
-      }
+      console.warn('Error fetching dashboard links, using localStorage fallback:', err);
+      // Fallback to localStorage for all 3 dashboards
+      setDashboards(prev => prev.map((dash, idx) => {
+        const savedUrl = localStorage.getItem(`dashboardUrl_${idx}`) ||
+                        (idx === 0 ? localStorage.getItem('dashboardUrl') : null);
+        return savedUrl ? { ...dash, dashboardUrl: savedUrl } : dash;
+      }));
     } finally {
       setLoading(false);
     }
@@ -293,65 +331,128 @@ export function DashboardSection() {
         dashboardUrl: url
       };
       setDashboards(updatedDashboards);
-      
+
       // Save to localStorage immediately as fallback
-      if (editingIndex === 0) {
-        localStorage.setItem('dashboardUrl', url);
-      }
-      
-      // Save to Supabase (only for first dashboard - Dashboard Ekonomi Regional)
-      if (editingIndex === 0) {
-        try {
-          // First, check if any active link exists
-          const { data: existingData, error: fetchError } = await supabase
-            .from('dashboard_links')
-            .select('id')
-            .eq('is_active', true)
-            .limit(1)
-            .single();
+      const storageKey = `dashboardUrl_${editingIndex}`;
+      localStorage.setItem(storageKey, url);
 
-          if (fetchError && fetchError.code !== 'PGRST116') {
-            // PGRST116 = no rows returned, which is OK
-            console.warn('Supabase not available, saved to localStorage only:', fetchError);
-            alert('⚠️ Link disimpan secara lokal. Setup Supabase untuk sinkronisasi antar device.');
-            return;
-          }
+      const dashboardTitle = updatedDashboards[editingIndex].title;
 
-          let result;
-          if (existingData?.id) {
+      try {
+        // First, fetch all records to check schema and find matching record
+        const { data: allData, error: fetchError } = await supabase
+          .from('dashboard_links')
+          .select('*')
+          .eq('is_active', true);
+
+        if (fetchError) {
+          console.warn('Supabase not available, saved to localStorage only:', fetchError);
+          alert('⚠️ Link disimpan secara lokal. Pastikan Supabase sudah dikonfigurasi.');
+          return;
+        }
+
+        // Check if dashboard_index column exists
+        const hasDashboardIndex = allData && allData.length > 0 && 'dashboard_index' in allData[0];
+
+        let existingRecord = null;
+        let result;
+
+        if (hasDashboardIndex) {
+          // New schema: Find record by dashboard_index
+          existingRecord = allData.find(item => item.dashboard_index === editingIndex);
+
+          if (existingRecord) {
             // Update existing record
             result = await supabase
               .from('dashboard_links')
-              .update({ 
+              .update({
                 url: url,
                 updated_at: new Date().toISOString(),
                 updated_by: 'admin'
               })
-              .eq('id', existingData.id);
+              .eq('id', existingRecord.id);
           } else {
-            // Insert new record
+            // Insert new record with dashboard_index
             result = await supabase
               .from('dashboard_links')
-              .insert({ 
+              .insert({
                 url: url,
-                label: 'Lihat Dashboard Lengkap',
+                label: dashboardTitle,
+                dashboard_index: editingIndex,
                 is_active: true,
                 updated_by: 'admin'
               });
           }
 
           if (result.error) {
-            console.warn('Supabase save failed, using localStorage:', result.error);
-            alert('⚠️ Link disimpan secara lokal. Setup Supabase untuk sinkronisasi antar device.');
+            console.warn('Supabase save failed:', result.error);
+            alert('⚠️ Link disimpan secara lokal. Error: ' + result.error.message);
             return;
           }
 
-          console.log('✅ Dashboard link saved to Supabase');
-          alert('✅ Link berhasil disimpan dan akan sync ke semua device!');
-        } catch (err) {
-          console.warn('Error saving to Supabase, using localStorage:', err);
-          alert('⚠️ Link disimpan secara lokal. Setup Supabase untuk sinkronisasi antar device.');
+          console.log(`✅ Dashboard ${editingIndex + 1} saved (new schema)`);
+          alert(`✅ Link ${dashboardTitle} berhasil disimpan dan akan sync ke semua device!`);
+
+        } else {
+          // Old schema without dashboard_index: Only save dashboard 0 (first one)
+          console.log('⚠️ Old schema detected (no dashboard_index column)');
+
+          if (editingIndex === 0) {
+            // Get first record for dashboard 0
+            existingRecord = allData.length > 0 ? allData[0] : null;
+
+            if (existingRecord) {
+              // Update existing record
+              result = await supabase
+                .from('dashboard_links')
+                .update({
+                  url: url,
+                  updated_at: new Date().toISOString(),
+                  updated_by: 'admin'
+                })
+                .eq('id', existingRecord.id);
+            } else {
+              // Insert new record (old schema)
+              result = await supabase
+                .from('dashboard_links')
+                .insert({
+                  url: url,
+                  label: dashboardTitle,
+                  is_active: true,
+                  updated_by: 'admin'
+                });
+            }
+
+            if (result.error) {
+              console.warn('Supabase save failed:', result.error);
+              alert('⚠️ Link disimpan secara lokal. Error: ' + result.error.message);
+              return;
+            }
+
+            console.log('✅ Dashboard 1 saved (old schema)');
+            alert('✅ Link berhasil disimpan!\n\n💡 Tip: Jalankan migration SQL untuk enable sync Dashboard 2 & 3.');
+
+          } else {
+            // Dashboard 2 or 3 - can't save without dashboard_index column
+            console.warn('Cannot save dashboard 2/3 without migration');
+            alert(`⚠️ Dashboard 2 & 3 memerlukan migration database.
+
+Link disimpan secara lokal saja.
+
+Untuk enable sinkronisasi, jalankan SQL berikut di Supabase:
+
+ALTER TABLE dashboard_links
+ADD COLUMN dashboard_index INTEGER DEFAULT 0;
+
+INSERT INTO dashboard_links (url, label, dashboard_index, is_active)
+VALUES ('#', 'Dashboard Realisasi Belanja', 1, true),
+       ('#', 'Dashboard Monitoring Kinerja', 2, true);`);
+          }
         }
+
+      } catch (err) {
+        console.warn('Error saving to Supabase:', err);
+        alert('⚠️ Link disimpan secara lokal. Error: ' + (err as Error).message);
       }
     }
   };

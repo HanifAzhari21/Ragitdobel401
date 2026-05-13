@@ -30,15 +30,18 @@ CREATE TABLE IF NOT EXISTS dashboard_links (
   id SERIAL PRIMARY KEY,
   url TEXT NOT NULL,
   label TEXT DEFAULT 'Lihat Dashboard Lengkap',
+  dashboard_index INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_by TEXT
 );
 
--- Insert default data
-INSERT INTO dashboard_links (url, label, is_active) 
-VALUES ('#', 'Lihat Dashboard Lengkap', true)
+-- Insert default data for all 3 dashboards
+INSERT INTO dashboard_links (url, label, dashboard_index, is_active) VALUES
+  ('#', 'Dashboard Ekonomi Regional', 0, true),
+  ('#', 'Dashboard Realisasi Belanja', 1, true),
+  ('#', 'Dashboard Monitoring Kinerja', 2, true)
 ON CONFLICT DO NOTHING;
 
 -- 2. Tabel LMS Links
