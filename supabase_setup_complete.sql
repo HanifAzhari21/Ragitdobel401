@@ -18,11 +18,14 @@ CREATE TABLE IF NOT EXISTS dashboard_links (
 
 -- 2. INSERT DATA DEFAULT (3 DASHBOARD)
 -- ===============================================
+-- Delete existing data first to avoid conflicts
+DELETE FROM dashboard_links WHERE dashboard_index IN (0, 1, 2);
+
+-- Insert fresh data
 INSERT INTO dashboard_links (url, label, dashboard_index, is_active) VALUES
   ('#', 'Dashboard Ekonomi Regional', 0, true),
   ('#', 'Dashboard Realisasi Belanja', 1, true),
-  ('#', 'Dashboard Monitoring Kinerja', 2, true)
-ON CONFLICT DO NOTHING;
+  ('#', 'Dashboard Monitoring Kinerja', 2, true);
 
 -- 3. ENABLE ROW LEVEL SECURITY
 -- ===============================================
@@ -82,10 +85,12 @@ CREATE TABLE IF NOT EXISTS lms_links (
   updated_by TEXT
 );
 
+-- Delete existing data first
+DELETE FROM lms_links;
+
 -- Insert data default LMS
 INSERT INTO lms_links (url, label, is_active)
-VALUES ('/lms.html', 'Masuk ke LMS', true)
-ON CONFLICT DO NOTHING;
+VALUES ('/lms.html', 'Masuk ke LMS', true);
 
 -- Enable RLS untuk lms_links
 ALTER TABLE lms_links ENABLE ROW LEVEL SECURITY;
@@ -164,35 +169,20 @@ CREATE POLICY "Allow public delete dokumentasi"
   FOR DELETE
   USING (true);
 
--- 8. VERIFY - LIHAT SEMUA DATA
--- ===============================================
-SELECT
-  'dashboard_links' as table_name,
-  id,
-  label,
-  dashboard_index,
-  url,
-  is_active
-FROM dashboard_links
-ORDER BY dashboard_index;
-
-SELECT
-  'lms_links' as table_name,
-  id,
-  label,
-  url,
-  is_active
-FROM lms_links;
-
 -- ===============================================
 -- SETUP SELESAI!
 -- ===============================================
+-- Success! Tables dan policies sudah dibuat.
+--
 -- NEXT STEPS:
 -- 1. Enable Realtime di Database > Replication untuk:
 --    - dashboard_links
 --    - lms_links
 --    - dokumentasi_kegiatan
 --
--- 2. Test save dari website
--- 3. Verify data tersimpan di table
+-- 2. Verify data dengan query ini (copy dan run terpisah):
+--    SELECT * FROM dashboard_links ORDER BY dashboard_index;
+--    SELECT * FROM lms_links;
+--
+-- 3. Test save dari website
 -- ===============================================
