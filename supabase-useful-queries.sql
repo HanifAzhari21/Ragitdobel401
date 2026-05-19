@@ -162,7 +162,7 @@ WHERE id = 1;
 -- Update LMS link
 UPDATE lms_links
 SET 
-  url = 'https://learning.kemenkeu.go.id/new-url',
+  url = 'https://sites.google.com/view/kelasdiskusi/home?authuser=1',
   updated_at = NOW(),
   updated_by = 'RagitAdmin1'
 WHERE id = 1;
