@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS lms_links (
 -- Insert default LMS link
 INSERT INTO lms_links (url, label) 
 VALUES (
-  'https://learning.kemenkeu.go.id',
+  'https://sites.google.com/view/kelasdiskusi/home?authuser=1',
   'Masuk ke LMS'
 )
 ON CONFLICT DO NOTHING;
