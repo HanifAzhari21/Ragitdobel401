@@ -24,8 +24,8 @@ DELETE FROM dashboard_links WHERE dashboard_index IN (0, 1, 2);
 -- Insert fresh data
 INSERT INTO dashboard_links (url, label, dashboard_index, is_active) VALUES
   ('#', 'Dashboard Ekonomi Regional', 0, true),
-  ('#', 'Dashboard Realisasi Belanja', 1, true),
-  ('#', 'Dashboard Monitoring Kinerja', 2, true);
+  ('#', 'Kredit Usaha Rakyat', 1, true),
+  ('#', 'Indikator Kinerja Pelaksanaan Anggaran (IKPA)', 2, true);
 
 -- 3. ENABLE ROW LEVEL SECURITY
 -- ===============================================
@@ -90,7 +90,7 @@ DELETE FROM lms_links;
 
 -- Insert data default LMS
 INSERT INTO lms_links (url, label, is_active)
-VALUES ('/lms.html', 'Masuk ke LMS', true);
+VALUES ('https://sites.google.com/view/kelasdiskusi/home?authuser=1', 'Masuk ke LMS', true);
 
 -- Enable RLS untuk lms_links
 ALTER TABLE lms_links ENABLE ROW LEVEL SECURITY;

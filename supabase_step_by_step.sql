@@ -22,8 +22,8 @@ DELETE FROM dashboard_links WHERE dashboard_index IN (0, 1, 2);
 
 INSERT INTO dashboard_links (url, label, dashboard_index, is_active) VALUES
   ('#', 'Dashboard Ekonomi Regional', 0, true),
-  ('#', 'Dashboard Realisasi Belanja', 1, true),
-  ('#', 'Dashboard Monitoring Kinerja', 2, true);
+  ('#', 'Kredit Usaha Rakyat', 1, true),
+  ('#', 'Indikator Kinerja Pelaksanaan Anggaran (IKPA)', 2, true);
 
 -- ===============================================
 -- STEP 3: ENABLE RLS & CREATE POLICIES
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS lms_links (
 DELETE FROM lms_links;
 
 INSERT INTO lms_links (url, label, is_active)
-VALUES ('/lms.html', 'Masuk ke LMS', true);
+VALUES ('https://sites.google.com/view/kelasdiskusi/home?authuser=1', 'Masuk ke LMS', true);
 
 ALTER TABLE lms_links ENABLE ROW LEVEL SECURITY;
 

@@ -192,14 +192,14 @@ export function DashboardSection() {
     {
       icon: <CreditCard />,
       title: "Kredit Usaha Rakyat",
-      description: "Program pembiayaan bersubsidi dari pemerintah untuk mendukung pengembangan usaha mikro, kecil, dan menengah (UMKM).",
+      description: "Program pembiayaan bersubsidi dari pemerintah untuk mendukung pengembangan usaha mikro, kecil, dan menengah (UMKM)",
       gradient: "bg-gradient-to-br from-blue-800 to-blue-700",
       dashboardUrl: "#"
     },
     {
       icon: <BarChart3 />,
       title: "Indikator Kinerja Pelaksanaan Anggaran (IKPA)",
-      description: "Alat ukur yang digunakan untuk menilai kualitas pelaksanaan anggaran dan kinerja pengelolaan keuangan pada satuan kerja.",
+      description: "Alat ukur yang digunakan untuk menilai kualitas pelaksanaan anggaran dan kinerja pengelolaan keuangan pada satuan kerja",
       gradient: "bg-gradient-to-br from-blue-800 to-blue-700",
       dashboardUrl: "#"
     }

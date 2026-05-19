@@ -84,7 +84,7 @@ function EditLinkModal({ isOpen, onClose, onSave, currentUrl }: EditLinkModalPro
 export function LMSSection() {
   const { isAdmin } = useDarkMode();
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [lmsUrl, setLmsUrl] = useState('/lms.html');
+  const [lmsUrl, setLmsUrl] = useState('https://sites.google.com/view/kelasdiskusi/home?authuser=1');
   const [loading, setLoading] = useState(true);
 
   // Fetch LMS link from Supabase on mount and setup real-time sync
@@ -125,7 +125,7 @@ export function LMSSection() {
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid error when no rows
 
       if (error) {
         console.warn('Supabase fetch failed, using localStorage fallback:', error);
@@ -138,6 +138,14 @@ export function LMSSection() {
         setLmsUrl(data.url);
         // Also save to localStorage for offline support
         localStorage.setItem('lmsUrl', data.url);
+        console.log('✅ LMS link loaded from Supabase:', data.url);
+      } else {
+        // No data in Supabase, try localStorage
+        console.log('⚠️ No LMS data in Supabase, using localStorage or default');
+        const savedUrl = localStorage.getItem('lmsUrl');
+        if (savedUrl) {
+          setLmsUrl(savedUrl);
+        }
       }
     } catch (err) {
       console.warn('Error fetching LMS link, using localStorage fallback:', err);
@@ -162,10 +170,10 @@ export function LMSSection() {
 
   const handleSaveLink = async (url: string) => {
     setLmsUrl(url);
-    
+
     // Save to localStorage immediately as fallback
     localStorage.setItem('lmsUrl', url);
-    
+
     // Save to Supabase
     try {
       // First, check if any active link exists
@@ -174,21 +182,21 @@ export function LMSSection() {
         .select('id')
         .eq('is_active', true)
         .limit(1)
-        .single();
+        .maybeSingle(); // Use maybeSingle to avoid error when no rows
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
-        // PGRST116 = no rows returned, which is OK
-        console.warn('Supabase not available, saved to localStorage only:', fetchError);
-        alert('⚠️ Link disimpan secara lokal. Setup Supabase untuk sinkronisasi antar device.');
+      if (fetchError) {
+        console.error('Supabase fetch error:', fetchError);
+        alert('⚠️ Error mengecek data. Link disimpan secara lokal.\n\nDetail: ' + fetchError.message);
         return;
       }
 
       let result;
       if (existingData?.id) {
         // Update existing record
+        console.log('Updating existing LMS record:', existingData.id);
         result = await supabase
           .from('lms_links')
-          .update({ 
+          .update({
             url: url,
             updated_at: new Date().toISOString(),
             updated_by: 'admin'
@@ -196,9 +204,10 @@ export function LMSSection() {
           .eq('id', existingData.id);
       } else {
         // Insert new record
+        console.log('Inserting new LMS record');
         result = await supabase
           .from('lms_links')
-          .insert({ 
+          .insert({
             url: url,
             label: 'Masuk ke LMS',
             is_active: true,
@@ -207,16 +216,16 @@ export function LMSSection() {
       }
 
       if (result.error) {
-        console.warn('Supabase save failed, using localStorage:', result.error);
-        alert('⚠️ Link disimpan secara lokal. Setup Supabase untuk sinkronisasi antar device.');
+        console.error('Supabase save error:', result.error);
+        alert('⚠️ Gagal menyimpan ke database.\n\nLink tersimpan secara lokal.\n\nError: ' + result.error.message);
         return;
       }
 
-      console.log('✅ LMS link saved to Supabase');
-      alert('✅ Link berhasil disimpan dan akan sync ke semua device!');
+      console.log('✅ LMS link saved to Supabase successfully');
+      alert('✅ Link LMS berhasil disimpan dan akan sync ke semua device!');
     } catch (err) {
-      console.warn('Error saving to Supabase, using localStorage:', err);
-      alert('⚠️ Link disimpan secara lokal. Setup Supabase untuk sinkronisasi antar device.');
+      console.error('Error saving LMS link:', err);
+      alert('⚠️ Terjadi error. Link tersimpan secara lokal.\n\nError: ' + (err as Error).message);
     }
   };
 
